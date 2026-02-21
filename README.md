@@ -1,4 +1,4 @@
-# 📚 Biblioteca API - v0.0.2 (Alpha)
+# 📚 Biblioteca API - v0.0.3 (Alpha)
 
 Este es el inicio de mi proyecto de API para gestión de bibliotecas, desarrollado con **FastAPI**.
 
@@ -17,6 +17,12 @@ Este es el inicio de mi proyecto de API para gestión de bibliotecas, desarrolla
 2. Correr el servidor: `uvicorn main:app --reload`
 
 ## 📝 Historial de Versiones
+
+### [v0.0.3] - 2026-02-20
+**Añadido:**
+- Implementación de **Actualización** (Update) mediante el método `PUT /libros/{id}`.
+- Validación para impedir la edición de libros marcados como inactivos.
+- CRUD básico completo (en memoria).
 
 ### [v0.0.2] - 2026-02-20
 **Añadido:**

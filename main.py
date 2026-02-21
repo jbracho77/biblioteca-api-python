@@ -54,3 +54,19 @@ def desactivar_libro(libro_id: int):
             return {"mensaje": f"El libro '{libro['titulo']}' ha sido marcado como inactivo"}
             
     raise HTTPException(status_code=404, detail="Libro no encontrado")
+
+# 5. Actualizar un libro 
+@app.put("/libros/{libro_id}")
+def actualizar_libro(libro_id: int, libro_actualizado: Libro):
+    for indice, libro in enumerate(biblioteca):
+        if libro["id"] == libro_id:
+            # Si el libro está desactivado (borrado lógico), no permitimos editarlo
+            if not libro["activo"]:
+                raise HTTPException(status_code=400, detail="No se puede editar un libro inactivo")
+            
+            # Reemplazamos los datos antiguos con los nuevos
+            # Convertimos el objeto Pydantic a diccionario
+            biblioteca[indice] = libro_actualizado.dict()
+            return {"mensaje": f"Libro con ID {libro_id} actualizado correctamente"}
+            
+    raise HTTPException(status_code=404, detail="Libro no encontrado")
