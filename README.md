@@ -1,4 +1,4 @@
-# 📚 Biblioteca API - v0.0.1 (Alpha)
+# 📚 Biblioteca API - v0.0.2 (Alpha)
 
 Este es el inicio de mi proyecto de API para gestión de bibliotecas, desarrollado con **FastAPI**.
 
