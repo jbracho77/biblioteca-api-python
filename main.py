@@ -37,10 +37,20 @@ def obtener_libro(libro_id: int):
     raise HTTPException(status_code=404, detail="Libro no encontrado")
 
 # 3. Agregar un nuevo libro
+# --- Mejora 1: Validación al crear ---
 @app.post("/libros")
 def crear_libro(nuevo_libro: Libro):
+    # Comprobamos si el ID ya existe
+    for libro in biblioteca:
+        if libro["id"] == nuevo_libro.id:
+            raise HTTPException(status_code=400, detail="El ID del libro ya existe")
+    
+    # Comprobamos que el título no esté vacío
+    if not nuevo_libro.titulo.strip():
+        raise HTTPException(status_code=400, detail="El título no puede estar vacío")
+
     biblioteca.append(nuevo_libro.dict())
-    return {"mensaje": f"Libro '{nuevo_libro.titulo}' agregado con éxito"}
+    return {"mensaje": f"Libro '{nuevo_libro.titulo}' registrado"}
 
 # 4. Desactivar un libro (borrado lógico)
 @app.delete("/libros/{libro_id}")
@@ -68,5 +78,20 @@ def actualizar_libro(libro_id: int, libro_actualizado: Libro):
             # Convertimos el objeto Pydantic a diccionario
             biblioteca[indice] = libro_actualizado.dict()
             return {"mensaje": f"Libro con ID {libro_id} actualizado correctamente"}
+            
+    raise HTTPException(status_code=404, detail="Libro no encontrado")
+
+# 6 Lógica de Préstamo ---
+@app.post("/libros/{libro_id}/prestar")
+def prestar_libro(libro_id: int):
+    for libro in biblioteca:
+        if libro["id"] == libro_id:
+            if not libro["activo"]:
+                raise HTTPException(status_code=400, detail="El libro no existe en el catálogo activo")
+            if not libro["disponible"]:
+                raise HTTPException(status_code=400, detail="El libro ya se encuentra prestado")
+            
+            libro["disponible"] = False
+            return {"mensaje": f"Has pedido prestado: {libro['titulo']}"}
             
     raise HTTPException(status_code=404, detail="Libro no encontrado")
