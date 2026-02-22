@@ -21,11 +21,20 @@ biblioteca = [
 def inicio():
     return {"mensaje": "Bienvenido a la API de la Biblioteca"}
 
-# 1. Obtener todos los libros
+# 1. Obtener todos los libros o todos los libros de un autor
 @app.get("/libros", response_model=List[Libro])
-def obtener_libros():
-    # Usamos una "list comprehension" para filtrar
-    libros_activos = [libro for libro in biblioteca if libro["activo"] == True]
+def obtener_libros(autor: Optional[str] = None):
+    # Primero filtramos solo los que están activos
+    libros_activos = [libro for libro in biblioteca if libro["activo"]]
+    
+    # Si el usuario envió un autor, filtramos por nombre (sin importar mayúsculas/minúsculas)
+    if autor:
+        libros_filtrados = [
+            libro for libro in libros_activos 
+            if autor.lower() in libro["autor"].lower()
+        ]
+        return libros_filtrados
+    
     return libros_activos
 
 # 2. Obtener un libro por su ID
