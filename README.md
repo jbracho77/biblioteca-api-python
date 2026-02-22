@@ -2,13 +2,14 @@
 
 Este proyecto es una API RESTful desarrollada en **Python** para la gestión de una biblioteca. Implementa un ciclo de vida completo de datos (**CRUD**) y utiliza validación de tipos técnica mediante **Pydantic**.
 
-## 🚀 Funcionalidades (CRUD)
+## 🚀 Funcionalidades Avanzadas
 
-* **[C] Create:** Registro de nuevos libros con validación de tipos (`int`, `str`, `bool`).
-* **[R] Read:** Consulta de la lista de libros y búsqueda específica por **ID**.
-* **[U] Update:** Actualización de información de libros existentes mediante el método **PUT**.
-* **[D] Delete:** Implementación de **Borrado Lógico** (*Soft Delete*) para preservar el historial de datos.
-* **[P] Business Logic:** Endpoint especial para la **gestión de préstamos**, controlando la disponibilidad en tiempo real.
+* **[C] Create:** Registro con **validación de duplicados** (evita IDs repetidos) y limpieza de campos mediante `.strip()`.
+* **[R] Read:** Consulta de libros activos y búsqueda específica por **ID**.
+* **[U] Update:** Actualización de información de libros existentes (restringido a registros activos).
+* **[D] Delete:** **Borrado Lógico** (*Soft Delete*) para mantener integridad de datos.
+* **[P] Business Logic (Préstamos):** Gestión de salida de libros controlando que el ejemplar esté activo y no prestado previamente.
+* **[B] Business Logic (Devoluciones):** Gestión de entrada de libros con validación de estado de disponibilidad actual.
 
 ## 🛠️ Stack Tecnológico
 
@@ -34,6 +35,11 @@ Este proyecto es una API RESTful desarrollada en **Python** para la gestión de 
 ---
 
 ## 📝 Historial de Versiones (Changelog)
+
+### [v0.0.5] - 2026-02-22
+* **AÑADIDO:** Lógica de negocio para **Devoluciones** (`POST /libros/{id}/devolver`).
+* **MEJORA:** Control de estados de disponibilidad (evita devolver libros ya disponibles).
+* **LOGRO:** Sistema básico de gestión de flujo de inventario completado.
 
 ### [v0.0.4] - 2026-02-22
 * **AÑADIDO:** Lógica de negocio para **Préstamos** (`POST /libros/{id}/prestar`).

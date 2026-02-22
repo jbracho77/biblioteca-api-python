@@ -95,3 +95,24 @@ def prestar_libro(libro_id: int):
             return {"mensaje": f"Has pedido prestado: {libro['titulo']}"}
             
     raise HTTPException(status_code=404, detail="Libro no encontrado")
+
+# 7 Lógica de Devolución ---
+@app.post("/libros/{libro_id}/devolver")
+def devolver_libro(libro_id: int):
+    for libro in biblioteca:
+        if libro["id"] == libro_id:
+            # Regla 1: No se puede devolver algo que no existe físicamente (borrado lógico)
+            if not libro["activo"]:
+                raise HTTPException(status_code=400, detail="El libro no pertenece al catálogo activo")
+            
+            # Regla 2: Si el libro ya está disponible, no tiene sentido devolverlo
+            if libro["disponible"]:
+                raise HTTPException(status_code=400, detail="El libro ya se encuentra en la biblioteca")
+            
+            # Acción: Cambiamos el estado a disponible
+            libro["disponible"] = True
+            return {"mensaje": f"Has devuelto el libro: {libro['titulo']}. ¡Gracias!"}
+            
+    raise HTTPException(status_code=404, detail="Libro no encontrado")
+
+
