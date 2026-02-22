@@ -1,6 +1,20 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
+from sqlalchemy import Column, Integer, String, Boolean
+from database import Base, engine
+
+# Esto crea la tabla físicamente en el archivo .db si no existe
+class LibroDB(Base):
+    __tablename__ = "libros"
+    id = Column(Integer, primary_key=True, index=True)
+    titulo = Column(String)
+    autor = Column(String)
+    disponible = Column(Boolean, default=True)
+    activo = Column(Boolean, default=True)
+
+# Esta línea es vital: le dice a SQLAlchemy que cree la tabla ahora mismo
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -12,10 +26,7 @@ class Libro(BaseModel):
     disponible: bool = True
     activo: bool = True  # <--- Nuevo campo: True es visible, False es "borrado"
 
-biblioteca = [
-    {"id": 1, "titulo": "Cien años de soledad", "autor": "García Márquez", "disponible": True, "activo": True},
-    {"id": 2, "titulo": "1984", "autor": "George Orwell", "disponible": False, "activo": True}
-]
+biblioteca = []
 
 @app.get("/")
 def inicio():

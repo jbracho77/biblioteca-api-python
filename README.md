@@ -22,7 +22,7 @@ Este proyecto es una API RESTful desarrollada en **Python** para la gestión de 
 ## 🏁 Instalación y Ejecución
 
 1. **Clonar el repositorio:**
-   `git clone https://github.com/tu-usuario/nombre-del-repo.git`
+   `git clone https://github.com/jbracho77/biblioteca-api-python.git`
 
 2. **Instalar las librerías necesarias:**
    `pip install -r requirements.txt`
@@ -33,9 +33,17 @@ Este proyecto es una API RESTful desarrollada en **Python** para la gestión de 
 4. **Acceder a la documentación automática (Swagger UI):**
    `http://127.0.0.1:8000/docs`
 
+## 🛠️ Notas de Desarrollo (Linux Mint)
+Cada vez que abras una terminal nueva, debes activar el entorno:
+`source env/bin/activate`
 ---
 
 ## 📝 Historial de Versiones (Changelog)
+
+### [v0.1.0] - 2026-02-22
+* **ESTRUCTURA:** Configuración de SQLAlchemy y creación de `database.py`.
+* **PERSISTENCIA:** Implementación del modelo `LibroDB`.
+* **BASE DE DATOS:** Generación automática del archivo `biblioteca.db` (SQLite).
 
 ### [v0.0.7] - 2026-02-22
 * **AÑADIDO:** Parámetro de búsqueda por `titulo`.
