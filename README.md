@@ -10,7 +10,7 @@ Este proyecto es una API RESTful desarrollada en **Python** para la gestión de 
 * **[D] Delete:** **Borrado Lógico** (*Soft Delete*) para mantener integridad de datos.
 * **[P] Business Logic (Préstamos):** Gestión de salida de libros controlando que el ejemplar esté activo y no prestado previamente.
 * **[B] Business Logic (Devoluciones):** Gestión de entrada de libros con validación de estado de disponibilidad actual.
-* **[S] Search:** Sistema de filtrado por **autor** mediante Query Parameters con soporte para búsquedas parciales.
+* **[S] Search:** Filtros avanzados por **Autor** y **Título** mediante Query Parameters, con soporte para búsquedas combinadas y parciales.
 
 ## 🛠️ Stack Tecnológico
 
@@ -36,6 +36,11 @@ Este proyecto es una API RESTful desarrollada en **Python** para la gestión de 
 ---
 
 ## 📝 Historial de Versiones (Changelog)
+
+### [v0.0.7] - 2026-02-22
+* **AÑADIDO:** Parámetro de búsqueda por `titulo`.
+* **MEJORA:** Capacidad de combinar múltiples filtros (autor + título) en una sola consulta.
+* **MEJORA:** Normalización de texto para que las búsquedas no dependan de mayúsculas/minúsculas.
 
 ### [v0.0.6] - 2026-02-22
 * **AÑADIDO:** Búsqueda avanzada de libros por autor.

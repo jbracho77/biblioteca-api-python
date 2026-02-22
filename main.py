@@ -23,19 +23,25 @@ def inicio():
 
 # 1. Obtener todos los libros o todos los libros de un autor
 @app.get("/libros", response_model=List[Libro])
-def obtener_libros(autor: Optional[str] = None):
-    # Primero filtramos solo los que están activos
-    libros_activos = [libro for libro in biblioteca if libro["activo"]]
+def obtener_libros(autor: Optional[str] = None, titulo: Optional[str] = None):
+    # Paso 1: Partimos solo de los libros que no han sido borrados lógicamente
+    resultado = [libro for libro in biblioteca if libro["activo"]]
     
-    # Si el usuario envió un autor, filtramos por nombre (sin importar mayúsculas/minúsculas)
+    # Paso 2: Si el usuario filtra por autor
     if autor:
-        libros_filtrados = [
-            libro for libro in libros_activos 
+        resultado = [
+            libro for libro in resultado 
             if autor.lower() in libro["autor"].lower()
         ]
-        return libros_filtrados
     
-    return libros_activos
+    # Paso 3: Si el usuario filtra por título
+    if titulo:
+        resultado = [
+            libro for libro in resultado 
+            if titulo.lower() in libro["titulo"].lower()
+        ]
+    
+    return resultado
 
 # 2. Obtener un libro por su ID
 @app.get("/libros/{libro_id}")
