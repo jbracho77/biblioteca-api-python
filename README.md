@@ -37,6 +37,9 @@ Cada vez que abras una terminal nueva, debes activar el entorno:
 
 ## 📝 Historial de Versiones (Changelog)
 
+### [v0.1.1] - 2026-02-22
+* **MEJORA:** Validaciones de datos y manejo de errores.
+
 ### [v0.1.0] - 2026-02-22
 * **ESTRUCTURA:** Configuración de SQLAlchemy y creación de `database.py`.
 * **PERSISTENCIA:** Implementación del modelo `LibroDB`.

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from sqlalchemy import Column, Integer, String, Boolean
 from database import Base, engine
@@ -33,10 +33,14 @@ app = FastAPI()
 # Definimos el modelo de datos de un Libro
 class Libro(BaseModel):
     id: int
-    titulo: str
-    autor: str
+    # min_length: mínimo de caracteres | max_length: máximo
+    titulo: str = Field(..., min_length=1, max_length=100, description="El título no puede estar vacío")
+    autor: str = Field(..., min_length=3, max_length=50, description="El nombre del autor debe tener al menos 3 caracteres")
     disponible: bool = True
-    activo: bool = True  # <--- Nuevo campo: True es visible, False es "borrado"
+    activo: bool = True
+
+    class Config:
+        from_attributes = True
 
 @app.get("/")
 def inicio():
@@ -68,7 +72,17 @@ def obtener_libro_por_id(libro_id: int, db: Session = Depends(get_db)):
 # 3. Agregar un nuevo libro
 @app.post("/libros", response_model=Libro)
 def crear_libro(libro: Libro, db: Session = Depends(get_db)):
-    # 1. Creamos el objeto para la base de datos usando los datos que llegan (Pydantic)
+    # 1. BUSCAR si el ID ya existe en la base de datos
+    existe = db.query(LibroDB).filter(LibroDB.id == libro.id).first()
+    
+    if existe:
+        # Si existe, lanzamos un error 400 (Bad Request)
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Error: Ya existe un libro con el ID {libro.id}. Intenta con otro."
+        )
+
+    # 2. Si no existe, procedemos a crear el objeto
     nuevo_libro = LibroDB(
         id=libro.id,
         titulo=libro.titulo,
@@ -77,10 +91,9 @@ def crear_libro(libro: Libro, db: Session = Depends(get_db)):
         activo=libro.activo
     )
     
-    # 2. Le pedimos a SQLAlchemy que lo guarde
     db.add(nuevo_libro)
-    db.commit()      # <--- Aquí se escribe físicamente en el archivo .db
-    db.refresh(nuevo_libro) # <--- Recargamos el objeto para confirmar que se guardó
+    db.commit()
+    db.refresh(nuevo_libro)
     
     return nuevo_libro
 
