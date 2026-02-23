@@ -48,18 +48,29 @@ def inicio():
 
 # 1. Obtener todos los libros o todos los libros de un autor
 @app.get("/libros", response_model=List[Libro])
-def obtener_libros(autor: Optional[str] = None, db: Session = Depends(get_db)):
-    # 1. Creamos la consulta base: "Tráeme todos los LibroDB que estén activos"
+def obtener_libros(
+    titulo: Optional[str] = None, 
+    autor: Optional[str] = None, 
+    solo_disponible: bool = False, 
+    db: Session = Depends(get_db)
+):
+    # 1. Empezamos con la consulta base
     query = db.query(LibroDB).filter(LibroDB.activo == True)
     
-    # 2. Si el usuario pasó un autor por la URL, filtramos la consulta
+    # 2. Filtro por autor (si se proporciona)
     if autor:
-        # Usamos ilike para que no importe mayúsculas/minúsculas
         query = query.filter(LibroDB.autor.ilike(f"%{autor}%"))
         
-    # 3. Ejecutamos la consulta y devolvemos los resultados
-    libros_db = query.all()
-    return libros_db
+    # 3. Filtro por título (si se proporciona)
+    if titulo:
+        query = query.filter(LibroDB.titulo.ilike(f"%{titulo}%"))
+
+    # 4. Filtro de disponibilidad (solo si el usuario lo pide)
+    if solo_disponible:
+        query = query.filter(LibroDB.disponible == True)   
+         
+    # 5. Ejecutar y devolver
+    return query.all()
 
 # 2. Obtener un libro por su ID
 @app.get("/libros/{libro_id}", response_model=Libro)

@@ -2,11 +2,24 @@
 
 Este proyecto es una API RESTful desarrollada en **Python** para la gestión de una biblioteca. Implementa un ciclo de vida completo de datos (**CRUD**) y utiliza validación de tipos técnica mediante **Pydantic**.
 
-## 🚀 Estado del Proyecto (v0.1.0)
-- [x] CRUD básico en memoria.
-- [x] Conexión a Base de Datos (SQLite).
-- [x] Persistencia en creación (POST) y consulta (GET).
-- [ ] Persistencia en actualización y borrado (Próximamente).
+## 🚀 Estado del Proyecto (v0.1.2)
+- [x] **Persistencia total**: Uso de SQLite y SQLAlchemy.
+- [x] **Validaciones robustas**: Control de IDs duplicados y restricciones de texto con Pydantic.
+- [x] **Búsqueda Avanzada**: Filtros por título (palabras clave), autor y disponibilidad.
+- [x] **Borrado Lógico**: Los libros no se eliminan físicamente, se marcan como inactivos.
+
+## 🛠️ Nuevas Funcionalidades de Consulta
+Ahora puedes filtrar los libros usando parámetros en la URL o desde `/docs`:
+
+* **Por Título:** `GET /libros?titulo=quijote` (Busca coincidencias parciales).
+* **Por Autor:** `GET /libros?autor=cervantes`.
+* **Solo Disponibles:** `GET /libros?solo_disponible=true` (Filtra los libros que no están prestados).
+* **Combinado:** `GET /libros?titulo=viento&solo_disponible=true`.
+
+## 🛡️ Reglas de Validación
+- **ID**: Debe ser único (evita colisiones en la BD).
+- **Título**: Obligatorio, mínimo 1 carácter, máximo 100.
+- **Autor**: Obligatorio, mínimo 3 caracteres, máximo 50.
 
 ## 🛠️ Stack Tecnológico
 
