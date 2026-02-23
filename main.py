@@ -38,8 +38,6 @@ class Libro(BaseModel):
     disponible: bool = True
     activo: bool = True  # <--- Nuevo campo: True es visible, False es "borrado"
 
-biblioteca = []
-
 @app.get("/")
 def inicio():
     return {"mensaje": "Bienvenido a la API de la Biblioteca"}
@@ -60,12 +58,12 @@ def obtener_libros(autor: Optional[str] = None, db: Session = Depends(get_db)):
     return libros_db
 
 # 2. Obtener un libro por su ID
-@app.get("/libros/{libro_id}")
-def obtener_libro(libro_id: int):
-    for libro in biblioteca:
-        if libro["id"] == libro_id:
-            return libro
-    raise HTTPException(status_code=404, detail="Libro no encontrado")
+@app.get("/libros/{libro_id}", response_model=Libro)
+def obtener_libro_por_id(libro_id: int, db: Session = Depends(get_db)):
+    libro = db.query(LibroDB).filter(LibroDB.id == libro_id, LibroDB.activo == True).first()
+    if not libro:
+        raise HTTPException(status_code=404, detail="Libro no encontrado")
+    return libro
 
 # 3. Agregar un nuevo libro
 @app.post("/libros", response_model=Libro)
@@ -88,65 +86,66 @@ def crear_libro(libro: Libro, db: Session = Depends(get_db)):
 
 # 4. Desactivar un libro (borrado lógico)
 @app.delete("/libros/{libro_id}")
-def desactivar_libro(libro_id: int):
-    for libro in biblioteca:
-        if libro["id"] == libro_id:
-            if not libro["activo"]:
-                raise HTTPException(status_code=400, detail="El libro ya estaba desactivado")
-            
-            libro["activo"] = False  # <--- Aquí ocurre el "borrado lógico"
-            return {"mensaje": f"El libro '{libro['titulo']}' ha sido marcado como inactivo"}
-            
-    raise HTTPException(status_code=404, detail="Libro no encontrado")
+def eliminar_libro(libro_id: int, db: Session = Depends(get_db)):
+    # 1. Buscar el libro en la base de datos
+    libro_db = db.query(LibroDB).filter(LibroDB.id == libro_id, LibroDB.activo == True).first()
+    
+    # 2. Si no existe, lanzar error 404
+    if not libro_db:
+        raise HTTPException(status_code=404, detail="Libro no encontrado")
+    
+    # 3. Borrado lógico: lo marcamos como no activo
+    libro_db.activo = False
+    
+    # 4. Guardar cambios
+    db.commit()
+    
+    return {"message": f"Libro con ID {libro_id} eliminado correctamente (lógico)"}
 
 # 5. Actualizar un libro 
-@app.put("/libros/{libro_id}")
-def actualizar_libro(libro_id: int, libro_actualizado: Libro):
-    for indice, libro in enumerate(biblioteca):
-        if libro["id"] == libro_id:
-            # Si el libro está desactivado (borrado lógico), no permitimos editarlo
-            if not libro["activo"]:
-                raise HTTPException(status_code=400, detail="No se puede editar un libro inactivo")
-            
-            # Reemplazamos los datos antiguos con los nuevos
-            # Convertimos el objeto Pydantic a diccionario
-            biblioteca[indice] = libro_actualizado.dict()
-            return {"mensaje": f"Libro con ID {libro_id} actualizado correctamente"}
-            
-    raise HTTPException(status_code=404, detail="Libro no encontrado")
+@app.put("/libros/{libro_id}", response_model=Libro)
+def actualizar_libro(libro_id: int, libro_actualizado: Libro, db: Session = Depends(get_db)):
+    # 1. Buscar el libro existente
+    libro_db = db.query(LibroDB).filter(LibroDB.id == libro_id, LibroDB.activo == True).first()
+    
+    if not libro_db:
+        raise HTTPException(status_code=404, detail="Libro no encontrado")
+    
+    # 2. Actualizar los campos
+    libro_db.titulo = libro_actualizado.titulo
+    libro_db.autor = libro_actualizado.autor
+    libro_db.disponible = libro_actualizado.disponible
+    
+    # 3. Guardar en la base de datos
+    db.commit()
+    db.refresh(libro_db)
+    
+    return libro_db
 
 # 6 Lógica de Préstamo ---
 @app.post("/libros/{libro_id}/prestar")
-def prestar_libro(libro_id: int):
-    for libro in biblioteca:
-        if libro["id"] == libro_id:
-            if not libro["activo"]:
-                raise HTTPException(status_code=400, detail="El libro no existe en el catálogo activo")
-            if not libro["disponible"]:
-                raise HTTPException(status_code=400, detail="El libro ya se encuentra prestado")
-            
-            libro["disponible"] = False
-            return {"mensaje": f"Has pedido prestado: {libro['titulo']}"}
-            
-    raise HTTPException(status_code=404, detail="Libro no encontrado")
+def prestar_libro(libro_id: int, db: Session = Depends(get_db)):
+    libro = db.query(LibroDB).filter(LibroDB.id == libro_id, LibroDB.activo == True).first()
+    
+    if not libro:
+        raise HTTPException(status_code=404, detail="Libro no encontrado")
+    if not libro.disponible:
+        raise HTTPException(status_code=400, detail="El libro ya está prestado")
+    
+    libro.disponible = False
+    db.commit()
+    return {"message": f"Has pedido prestado: {libro.titulo}"}
 
 # 7 Lógica de Devolución ---
 @app.post("/libros/{libro_id}/devolver")
-def devolver_libro(libro_id: int):
-    for libro in biblioteca:
-        if libro["id"] == libro_id:
-            # Regla 1: No se puede devolver algo que no existe físicamente (borrado lógico)
-            if not libro["activo"]:
-                raise HTTPException(status_code=400, detail="El libro no pertenece al catálogo activo")
-            
-            # Regla 2: Si el libro ya está disponible, no tiene sentido devolverlo
-            if libro["disponible"]:
-                raise HTTPException(status_code=400, detail="El libro ya se encuentra en la biblioteca")
-            
-            # Acción: Cambiamos el estado a disponible
-            libro["disponible"] = True
-            return {"mensaje": f"Has devuelto el libro: {libro['titulo']}. ¡Gracias!"}
-            
-    raise HTTPException(status_code=404, detail="Libro no encontrado")
+def devolver_libro(libro_id: int, db: Session = Depends(get_db)):
+    libro = db.query(LibroDB).filter(LibroDB.id == libro_id, LibroDB.activo == True).first()
+    
+    if not libro:
+        raise HTTPException(status_code=404, detail="Libro no encontrado")
+    
+    libro.disponible = True
+    db.commit()
+    return {"message": f"Has devuelto: {libro.titulo}. ¡Gracias!"}
 
 
