@@ -2,15 +2,11 @@
 
 Este proyecto es una API RESTful desarrollada en **Python** para la gestión de una biblioteca. Implementa un ciclo de vida completo de datos (**CRUD**) y utiliza validación de tipos técnica mediante **Pydantic**.
 
-## 🚀 Funcionalidades Avanzadas
-
-* **[C] Create:** Registro con **validación de duplicados** (evita IDs repetidos) y limpieza de campos mediante `.strip()`.
-* **[R] Read:** Consulta de libros activos y búsqueda específica por **ID**.
-* **[U] Update:** Actualización de información de libros existentes (restringido a registros activos).
-* **[D] Delete:** **Borrado Lógico** (*Soft Delete*) para mantener integridad de datos.
-* **[P] Business Logic (Préstamos):** Gestión de salida de libros controlando que el ejemplar esté activo y no prestado previamente.
-* **[B] Business Logic (Devoluciones):** Gestión de entrada de libros con validación de estado de disponibilidad actual.
-* **[S] Search:** Filtros avanzados por **Autor** y **Título** mediante Query Parameters, con soporte para búsquedas combinadas y parciales.
+## 🚀 Estado del Proyecto (v0.1.0)
+- [x] CRUD básico en memoria.
+- [x] Conexión a Base de Datos (SQLite).
+- [x] Persistencia en creación (POST) y consulta (GET).
+- [ ] Persistencia en actualización y borrado (Próximamente).
 
 ## 🛠️ Stack Tecnológico
 
@@ -37,6 +33,7 @@ Este proyecto es una API RESTful desarrollada en **Python** para la gestión de 
 Cada vez que abras una terminal nueva, debes activar el entorno:
 `source env/bin/activate`
 ---
+
 
 ## 📝 Historial de Versiones (Changelog)
 

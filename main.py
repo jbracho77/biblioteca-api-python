@@ -13,6 +13,18 @@ class LibroDB(Base):
     disponible = Column(Boolean, default=True)
     activo = Column(Boolean, default=True)
 
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from database import SessionLocal
+
+# Esta función es el "grifo" que abre y cierra la conexión
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 # Esta línea es vital: le dice a SQLAlchemy que cree la tabla ahora mismo
 Base.metadata.create_all(bind=engine)
 
@@ -34,25 +46,18 @@ def inicio():
 
 # 1. Obtener todos los libros o todos los libros de un autor
 @app.get("/libros", response_model=List[Libro])
-def obtener_libros(autor: Optional[str] = None, titulo: Optional[str] = None):
-    # Paso 1: Partimos solo de los libros que no han sido borrados lógicamente
-    resultado = [libro for libro in biblioteca if libro["activo"]]
+def obtener_libros(autor: Optional[str] = None, db: Session = Depends(get_db)):
+    # 1. Creamos la consulta base: "Tráeme todos los LibroDB que estén activos"
+    query = db.query(LibroDB).filter(LibroDB.activo == True)
     
-    # Paso 2: Si el usuario filtra por autor
+    # 2. Si el usuario pasó un autor por la URL, filtramos la consulta
     if autor:
-        resultado = [
-            libro for libro in resultado 
-            if autor.lower() in libro["autor"].lower()
-        ]
-    
-    # Paso 3: Si el usuario filtra por título
-    if titulo:
-        resultado = [
-            libro for libro in resultado 
-            if titulo.lower() in libro["titulo"].lower()
-        ]
-    
-    return resultado
+        # Usamos ilike para que no importe mayúsculas/minúsculas
+        query = query.filter(LibroDB.autor.ilike(f"%{autor}%"))
+        
+    # 3. Ejecutamos la consulta y devolvemos los resultados
+    libros_db = query.all()
+    return libros_db
 
 # 2. Obtener un libro por su ID
 @app.get("/libros/{libro_id}")
@@ -63,20 +68,23 @@ def obtener_libro(libro_id: int):
     raise HTTPException(status_code=404, detail="Libro no encontrado")
 
 # 3. Agregar un nuevo libro
-# --- Mejora 1: Validación al crear ---
-@app.post("/libros")
-def crear_libro(nuevo_libro: Libro):
-    # Comprobamos si el ID ya existe
-    for libro in biblioteca:
-        if libro["id"] == nuevo_libro.id:
-            raise HTTPException(status_code=400, detail="El ID del libro ya existe")
+@app.post("/libros", response_model=Libro)
+def crear_libro(libro: Libro, db: Session = Depends(get_db)):
+    # 1. Creamos el objeto para la base de datos usando los datos que llegan (Pydantic)
+    nuevo_libro = LibroDB(
+        id=libro.id,
+        titulo=libro.titulo,
+        autor=libro.autor,
+        disponible=libro.disponible,
+        activo=libro.activo
+    )
     
-    # Comprobamos que el título no esté vacío
-    if not nuevo_libro.titulo.strip():
-        raise HTTPException(status_code=400, detail="El título no puede estar vacío")
-
-    biblioteca.append(nuevo_libro.dict())
-    return {"mensaje": f"Libro '{nuevo_libro.titulo}' registrado"}
+    # 2. Le pedimos a SQLAlchemy que lo guarde
+    db.add(nuevo_libro)
+    db.commit()      # <--- Aquí se escribe físicamente en el archivo .db
+    db.refresh(nuevo_libro) # <--- Recargamos el objeto para confirmar que se guardó
+    
+    return nuevo_libro
 
 # 4. Desactivar un libro (borrado lógico)
 @app.delete("/libros/{libro_id}")
