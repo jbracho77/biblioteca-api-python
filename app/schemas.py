@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from datetime import datetime 
 
 class LibroBase(BaseModel):
     id: int
@@ -7,6 +8,7 @@ class LibroBase(BaseModel):
     autor: str = Field(..., min_length=3, max_length=50)
     disponible: bool = True
     activo: bool = True
+    fecha_prestamo: Optional[datetime] = None 
 
     class Config:
         from_attributes = True

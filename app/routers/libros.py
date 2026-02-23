@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import datetime 
 from ..database import get_db
 from ..models import LibroDB
 from ..schemas import Libro
@@ -111,8 +112,10 @@ def prestar_libro(libro_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="El libro ya está prestado")
     
     libro.disponible = False
+    libro.fecha_prestamo = datetime.now() # <--- Grabamos el "ahora"
     db.commit()
-    return {"message": f"Has pedido prestado: {libro.titulo}"}
+    
+    return {"mensaje": f"Libro '{libro.titulo}' prestado el {libro.fecha_prestamo.strftime('%d/%m/%Y %H:%M')}"}
 
 # 7 Lógica de Devolución ---
 @router.post("/{libro_id}/devolver")
@@ -123,7 +126,8 @@ def devolver_libro(libro_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Libro no encontrado")
     
     libro.disponible = True
+    libro.fecha_prestamo = None # <--- Limpiamos la fecha
     db.commit()
-    return {"message": f"Has devuelto: {libro.titulo}. ¡Gracias!"}
-
+    
+    return {"mensaje": f"Libro '{libro.titulo}' devuelto correctamente"}
 

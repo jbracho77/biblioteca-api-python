@@ -2,6 +2,28 @@
 
 Este proyecto es una API RESTful desarrollada en **Python** para la gestión de una biblioteca. Implementa un ciclo de vida completo de datos (**CRUD**) y utiliza validación de tipos técnica mediante **Pydantic**.
 
+## 🕒 Gestión de Tiempos (v0.3.0)
+El sistema ahora registra el ciclo de vida de los préstamos con precisión temporal:
+
+- **Registro de actividad**: Se almacena automáticamente la fecha y hora exacta (`YYYY-MM-DD HH:MM:SS`) al momento de realizar un préstamo.
+- **Trazabilidad**: El campo `fecha_prestamo` permite auditar cuánto tiempo ha estado un libro fuera de la biblioteca.
+- **Limpieza de estados**: Al devolver un libro, la marca de tiempo se reinicia (`null`), dejando el ejemplar listo para un nuevo ciclo.
+
+## 🛠️ Nuevos Endpoints de Gestión
+- `POST /libros/{id}/prestar`: Cambia el estado a no disponible y sella la fecha actual.
+- `POST /libros/{id}/devolver`: Restablece la disponibilidad y limpia el registro de fecha.
+
+## 📊 Ejemplo de Respuesta (JSON)
+```json
+{
+  "id": 1,
+  "titulo": "El resplandor",
+  "autor": "Stephen King",
+  "disponible": false,
+  "fecha_prestamo": "2026-02-23T13:22:40"
+}
+```
+
 ## 🏗️ Arquitectura del Proyecto (v0.2.0)
 El proyecto ha sido refactorizado siguiendo una arquitectura modular para mejorar la escalabilidad:
 

@@ -1,4 +1,17 @@
-env/
+# Python (Archivos temporales)
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos Virtuales
+venv/
+env/
+.env
+
+# Base de Datos (Muy importante no subirla si quieres que otros empiecen de cero)
 *.db
+*.sqlite3
+
+# Editores de código
 .vscode/
+.idea/
