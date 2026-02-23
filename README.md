@@ -2,6 +2,15 @@
 
 Este proyecto es una API RESTful desarrollada en **Python** para la gestión de una biblioteca. Implementa un ciclo de vida completo de datos (**CRUD**) y utiliza validación de tipos técnica mediante **Pydantic**.
 
+## 🏗️ Arquitectura del Proyecto (v0.2.0)
+El proyecto ha sido refactorizado siguiendo una arquitectura modular para mejorar la escalabilidad:
+
+- **`app/database.py`**: Configuración y conexión a SQLAlchemy.
+- **`app/models.py`**: Definición de tablas de la base de datos (SQLAlchemy).
+- **`app/schemas.py`**: Modelos de validación y contratos de datos (Pydantic).
+- **`app/routers/`**: Lógica de los endpoints organizada por módulos.
+- **`main.py`**: Punto de entrada de la aplicación.
+
 ## 🚀 Estado del Proyecto (v0.1.2)
 - [x] **Persistencia total**: Uso de SQLite y SQLAlchemy.
 - [x] **Validaciones robustas**: Control de IDs duplicados y restricciones de texto con Pydantic.
