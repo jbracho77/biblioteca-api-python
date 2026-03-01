@@ -2,6 +2,13 @@
 
 Este proyecto es una API RESTful desarrollada en **Python** para la gestión de una biblioteca. Implementa un ciclo de vida completo de datos (**CRUD**) y utiliza validación de tipos técnica mediante **Pydantic**.
 
+## 🛡️ Capa de Validación (v0.3.2)
+Hemos reforzado la seguridad de los datos en los préstamos:
+
+- **Identidad Obligatoria**: No se permiten préstamos anónimos.
+- **Restricciones de Nombre**: El nombre del usuario debe tener entre 3 y 50 caracteres.
+- **Mensajes Informativos**: Si un libro ya está prestado, la API informa quién es el deudor actual.
+
 ## 👥 Control de Usuarios (v0.3.1)
 Ahora el sistema identifica quién tiene cada ejemplar:
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime 
@@ -113,18 +113,32 @@ def actualizar_libro(libro_id: int, libro_actualizado: Libro, db: Session = Depe
 
 # 6 Lógica de Préstamo ---
 @router.post("/{libro_id}/prestar")
-def prestar_libro(libro_id: int, usuario: str, db: Session = Depends(get_db)): # <-- Pedimos 'usuario'
+def prestar_libro(
+    libro_id: int, 
+    # Validamos: mínimo 3 caracteres, máximo 50
+    usuario: str = Query(..., min_length=3, max_length=50), 
+    db: Session = Depends(get_db)
+):
     libro = db.query(LibroDB).filter(LibroDB.id == libro_id, LibroDB.activo == True).first()
     
-    if not libro or not libro.disponible:
-        raise HTTPException(status_code=400, detail="No disponible o no existe")
+    if not libro:
+        raise HTTPException(status_code=404, detail="Libro no encontrado")
+        
+    if not libro.disponible:
+        # Un toque de elegancia: decir quién lo tiene
+        quien = libro.usuario_prestamo or "alguien"
+        raise HTTPException(
+            status_code=400, 
+            detail=f"El libro ya lo tiene {quien}"
+        )
     
+    # Si pasa las validaciones, procedemos
     libro.disponible = False
     libro.fecha_prestamo = datetime.now()
-    libro.usuario_prestamo = usuario # <-- Guardamos quién se lo lleva
+    libro.usuario_prestamo = usuario
     db.commit()
     
-    return {"mensaje": f"Libro '{libro.titulo}' prestado a {usuario}"}
+    return {"mensaje": f"Libro '{libro.titulo}' prestado exitosamente a {usuario}"}
 
 # 7 Lógica de Devolución ---
 @router.post("/{libro_id}/devolver")
