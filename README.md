@@ -2,6 +2,13 @@
 
 Este proyecto es una API RESTful desarrollada en **Python** para la gestión de una biblioteca. Implementa un ciclo de vida completo de datos (**CRUD**) y utiliza validación de tipos técnica mediante **Pydantic**.
 
+## 📊 Reportes y Control de Mora (v0.4.0)
+El sistema ahora permite identificar automáticamente los retrasos en las devoluciones:
+
+- **Endpoint de Morosidad**: `GET /libros/reporte/atrasados`
+- **Filtro Temporal**: Permite definir cuántos días se consideran "atraso" mediante el parámetro `?dias=X`.
+- **Lógica Predictiva**: Utiliza comparaciones de `timedelta` para filtrar registros directamente en la base de datos.
+
 ## 🛡️ Capa de Validación (v0.3.2)
 Hemos reforzado la seguridad de los datos en los préstamos:
 

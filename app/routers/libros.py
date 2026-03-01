@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from datetime import datetime 
+from datetime import datetime, timedelta 
 from ..database import get_db
 from ..models import LibroDB
 from ..schemas import Libro
@@ -37,6 +37,27 @@ def obtener_libros(
         
     return query.all()
 
+# 8 Obtener los libros atrasados
+@router.get("/reporte/atrasados", response_model=List[Libro])
+def obtener_libros_atrasados(
+    dias: int = Query(7, ge=1), # Por defecto 7 días, mínimo 1
+    db: Session = Depends(get_db)
+):
+    # Calculamos la fecha límite (Hoy menos X días)
+    fecha_limite = datetime.now() - timedelta(days=dias)
+    
+    # Buscamos libros que:
+    # 1. No estén disponibles
+    # 2. La fecha de préstamo sea ANTERIOR a la fecha límite
+    # 3. Estén activos
+    libros_en_mora = db.query(LibroDB).filter(
+        LibroDB.disponible == False,
+        LibroDB.fecha_prestamo <= fecha_limite,
+        LibroDB.activo == True
+    ).all()
+    
+    return libros_en_mora
+    
 # 2. Obtener un libro por su ID
 @router.get("/{libro_id}", response_model=Libro)
 def obtener_libro_por_id(libro_id: int, db: Session = Depends(get_db)):
@@ -155,6 +176,9 @@ def devolver_libro(libro_id: int, db: Session = Depends(get_db)):
     db.commit()
     
     return {"mensaje": f"Libro '{libro.titulo}' devuelto y disponible"}
+
+
+
 
 
 
