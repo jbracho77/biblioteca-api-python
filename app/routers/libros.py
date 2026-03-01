@@ -11,20 +11,30 @@ router = APIRouter(
     tags=["Libros"]
 )
 
-@router.get("/", response_model=List[Libro]) # Nota que ahora la ruta es "/" porque el prefijo es "/libros"
+@router.get("/", response_model=List[Libro])
 def obtener_libros(
     titulo: Optional[str] = None, 
     autor: Optional[str] = None, 
     solo_disponible: bool = False, 
+    usuario: Optional[str] = None, # <-- Nuevo parámetro opcional
     db: Session = Depends(get_db)
 ):
+    # 1. Consulta base (solo activos)
     query = db.query(LibroDB).filter(LibroDB.activo == True)
+    
+    # 2. Filtros existentes
     if autor:
         query = query.filter(LibroDB.autor.ilike(f"%{autor}%"))
     if titulo:
         query = query.filter(LibroDB.titulo.ilike(f"%{titulo}%"))
     if solo_disponible:
-        query = query.filter(LibroDB.disponible == True)   
+        query = query.filter(LibroDB.disponible == True)
+
+    # 3. NUEVO: Filtro por usuario deudor
+    if usuario:
+        # Buscamos coincidencias en el nombre del usuario
+        query = query.filter(LibroDB.usuario_prestamo.ilike(f"%{usuario}%"))
+        
     return query.all()
 
 # 2. Obtener un libro por su ID
@@ -103,19 +113,18 @@ def actualizar_libro(libro_id: int, libro_actualizado: Libro, db: Session = Depe
 
 # 6 Lógica de Préstamo ---
 @router.post("/{libro_id}/prestar")
-def prestar_libro(libro_id: int, db: Session = Depends(get_db)):
+def prestar_libro(libro_id: int, usuario: str, db: Session = Depends(get_db)): # <-- Pedimos 'usuario'
     libro = db.query(LibroDB).filter(LibroDB.id == libro_id, LibroDB.activo == True).first()
     
-    if not libro:
-        raise HTTPException(status_code=404, detail="Libro no encontrado")
-    if not libro.disponible:
-        raise HTTPException(status_code=400, detail="El libro ya está prestado")
+    if not libro or not libro.disponible:
+        raise HTTPException(status_code=400, detail="No disponible o no existe")
     
     libro.disponible = False
-    libro.fecha_prestamo = datetime.now() # <--- Grabamos el "ahora"
+    libro.fecha_prestamo = datetime.now()
+    libro.usuario_prestamo = usuario # <-- Guardamos quién se lo lleva
     db.commit()
     
-    return {"mensaje": f"Libro '{libro.titulo}' prestado el {libro.fecha_prestamo.strftime('%d/%m/%Y %H:%M')}"}
+    return {"mensaje": f"Libro '{libro.titulo}' prestado a {usuario}"}
 
 # 7 Lógica de Devolución ---
 @router.post("/{libro_id}/devolver")
@@ -123,11 +132,15 @@ def devolver_libro(libro_id: int, db: Session = Depends(get_db)):
     libro = db.query(LibroDB).filter(LibroDB.id == libro_id, LibroDB.activo == True).first()
     
     if not libro:
-        raise HTTPException(status_code=404, detail="Libro no encontrado")
+        raise HTTPException(status_code=404, detail="No encontrado")
     
+    # Al devolver, limpiamos ambos campos
     libro.disponible = True
-    libro.fecha_prestamo = None # <--- Limpiamos la fecha
+    libro.fecha_prestamo = None
+    libro.usuario_prestamo = None # <-- Limpiamos el deudor
     db.commit()
     
-    return {"mensaje": f"Libro '{libro.titulo}' devuelto correctamente"}
+    return {"mensaje": f"Libro '{libro.titulo}' devuelto y disponible"}
+
+
 

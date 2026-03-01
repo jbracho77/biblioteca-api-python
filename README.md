@@ -2,6 +2,13 @@
 
 Este proyecto es una API RESTful desarrollada en **Python** para la gestión de una biblioteca. Implementa un ciclo de vida completo de datos (**CRUD**) y utiliza validación de tipos técnica mediante **Pydantic**.
 
+## 👥 Control de Usuarios (v0.3.1)
+Ahora el sistema identifica quién tiene cada ejemplar:
+
+- **Asignación de préstamos**: El endpoint `/prestar` ahora requiere un nombre de usuario.
+- **Auditoría de deudores**: Campo `usuario_prestamo` añadido para trazabilidad completa.
+- **Búsqueda por usuario**: Nuevo filtro en `GET /libros?usuario=nombre` para consultar qué libros tiene una persona específica.
+
 ## 🕒 Gestión de Tiempos (v0.3.0)
 El sistema ahora registra el ciclo de vida de los préstamos con precisión temporal:
 
@@ -73,7 +80,7 @@ Ahora puedes filtrar los libros usando parámetros en la URL o desde `/docs`:
 4. **Acceder a la documentación automática (Swagger UI):**
    `http://127.0.0.1:8000/docs`
 
-## 🛠️ Notas de Desarrollo (Linux Mint)
+## 🛠️ Notas de Desarrollo (Linux Mint) ##
 Cada vez que abras una terminal nueva, debes activar el entorno:
 `source env/bin/activate`
 ---

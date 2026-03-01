@@ -4,7 +4,6 @@ from .database import Base
 
 class LibroDB(Base):
     __tablename__ = "libros"
-
     id = Column(Integer, primary_key=True, index=True)
     titulo = Column(String)
     autor = Column(String)
@@ -12,3 +11,4 @@ class LibroDB(Base):
     activo = Column(Boolean, default=True)
     # Nuevo campo: permite saber cuándo se prestó (puede ser nulo si no está prestado)
     fecha_prestamo = Column(DateTime, nullable=True)
+    usuario_prestamo = Column(String, nullable=True)

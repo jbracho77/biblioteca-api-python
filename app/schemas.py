@@ -9,6 +9,7 @@ class LibroBase(BaseModel):
     disponible: bool = True
     activo: bool = True
     fecha_prestamo: Optional[datetime] = None 
+    usuario_prestamo: Optional[str] = None
 
     class Config:
         from_attributes = True
