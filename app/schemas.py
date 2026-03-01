@@ -6,6 +6,7 @@ class LibroBase(BaseModel):
     id: int
     titulo: str = Field(..., min_length=1, max_length=100)
     autor: str = Field(..., min_length=3, max_length=50)
+    categoria: str = Field("General", min_length=3, max_length=20) # Nuevo campo
     disponible: bool = True
     activo: bool = True
     fecha_prestamo: Optional[datetime] = None 

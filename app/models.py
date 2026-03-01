@@ -9,6 +9,6 @@ class LibroDB(Base):
     autor = Column(String)
     disponible = Column(Boolean, default=True)
     activo = Column(Boolean, default=True)
-    # Nuevo campo: permite saber cuándo se prestó (puede ser nulo si no está prestado)
     fecha_prestamo = Column(DateTime, nullable=True)
     usuario_prestamo = Column(String, nullable=True)
+    categoria = Column(String, default="Sin categoría")

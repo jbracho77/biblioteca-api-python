@@ -15,25 +15,23 @@ router = APIRouter(
 def obtener_libros(
     titulo: Optional[str] = None, 
     autor: Optional[str] = None, 
+    categoria: Optional[str] = None, # <-- Nuevo filtro
     solo_disponible: bool = False, 
-    usuario: Optional[str] = None, # <-- Nuevo parámetro opcional
+    usuario: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    # 1. Consulta base (solo activos)
     query = db.query(LibroDB).filter(LibroDB.activo == True)
     
-    # 2. Filtros existentes
-    if autor:
-        query = query.filter(LibroDB.autor.ilike(f"%{autor}%"))
-    if titulo:
-        query = query.filter(LibroDB.titulo.ilike(f"%{titulo}%"))
-    if solo_disponible:
-        query = query.filter(LibroDB.disponible == True)
-
-    # 3. NUEVO: Filtro por usuario deudor
-    if usuario:
-        # Buscamos coincidencias en el nombre del usuario
-        query = query.filter(LibroDB.usuario_prestamo.ilike(f"%{usuario}%"))
+    # Filtros existentes...
+    if autor: query = query.filter(LibroDB.autor.ilike(f"%{autor}%"))
+    if titulo: query = query.filter(LibroDB.titulo.ilike(f"%{titulo}%"))
+    
+    # NUEVO: Filtro por categoría
+    if categoria:
+        query = query.filter(LibroDB.categoria.ilike(f"%{categoria}%"))
+        
+    if solo_disponible: query = query.filter(LibroDB.disponible == True)
+    if usuario: query = query.filter(LibroDB.usuario_prestamo.ilike(f"%{usuario}%"))
         
     return query.all()
 
@@ -57,7 +55,7 @@ def obtener_libros_atrasados(
     ).all()
     
     return libros_en_mora
-    
+
 # 2. Obtener un libro por su ID
 @router.get("/{libro_id}", response_model=Libro)
 def obtener_libro_por_id(libro_id: int, db: Session = Depends(get_db)):

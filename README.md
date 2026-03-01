@@ -2,6 +2,13 @@
 
 Este proyecto es una API RESTful desarrollada en **Python** para la gestión de una biblioteca. Implementa un ciclo de vida completo de datos (**CRUD**) y utiliza validación de tipos técnica mediante **Pydantic**.
 
+## 📂 Clasificación por Categorías (v0.5.0)
+Ahora es posible organizar la colección por géneros o secciones:
+
+- **Etiquetado**: Cada libro puede ser asignado a una categoría (Terror, Ciencia Ficción, Historia, etc.).
+- **Búsqueda Especializada**: Se ha añadido el parámetro `categoria` al endpoint principal de consulta.
+- **Normalización**: Por defecto, los libros se asignan a la categoría "General" si no se especifica otra.
+
 ## 📊 Reportes y Control de Mora (v0.4.0)
 El sistema ahora permite identificar automáticamente los retrasos en las devoluciones:
 
