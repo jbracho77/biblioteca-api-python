@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional
 from datetime import datetime, timedelta 
 from ..database import get_db
@@ -34,6 +35,23 @@ def obtener_libros(
     if usuario: query = query.filter(LibroDB.usuario_prestamo.ilike(f"%{usuario}%"))
         
     return query.all()
+
+# 9 Totales por categoria
+@router.get("/estadisticas/categorias")
+def obtener_estadisticas_por_categoria(db: Session = Depends(get_db)):
+    # Esta consulta hace un: SELECT categoria, count(id) FROM libros GROUP BY categoria
+    resultado = (
+        db.query(
+            LibroDB.categoria, 
+            func.count(LibroDB.id).label("total")
+        )
+        .filter(LibroDB.activo == True)
+        .group_by(LibroDB.categoria)
+        .all()
+    )
+    
+    # Lo convertimos a un formato JSON amigable: {"Terror": 5, "Sci-Fi": 2}
+    return {categoria: total for categoria, total in resultado}
 
 # 8 Obtener los libros atrasados
 @router.get("/reporte/atrasados", response_model=List[Libro])

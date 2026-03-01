@@ -2,6 +2,13 @@
 
 Este proyecto es una API RESTful desarrollada en **Python** para la gestión de una biblioteca. Implementa un ciclo de vida completo de datos (**CRUD**) y utiliza validación de tipos técnica mediante **Pydantic**.
 
+## 📈 Analítica de Colección (v0.5.1)
+El sistema ahora ofrece métricas sobre la distribución del catálogo:
+
+- **Estadísticas Dinámicas**: Nuevo endpoint `GET /libros/estadisticas/categorias`.
+- **Agrupación Inteligente**: Conteo automático de ejemplares por género o categoría.
+- **Optimización SQL**: Uso de funciones de agregación para consultas de alto rendimiento.
+
 ## 📂 Clasificación por Categorías (v0.5.0)
 Ahora es posible organizar la colección por géneros o secciones:
 
